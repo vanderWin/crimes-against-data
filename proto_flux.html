@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux Score Area Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap');
+
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            color: #000;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+        }
+
+        button:hover {
+            background: #2B0573;
+        }
+
+        #chart-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 300;
+            margin: 20px 0;
+        }
+
+        #legend {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .checkbox-container {
+            display: inline-block;
+            margin: 0 10px;
+        }
+
+        .checkbox-container input {
+            margin-right: 5px;
+        }
+        .checkbox-container input[type="checkbox"] {
+            accent-color: black;
+        }
+    </style>
+</head>
+<body>
+    <button id="toggle-device">Toggle Device</button>
+    <h1 id="chart-title">Desktop Flux</h1>
+    <div id="legend"></div>
+    <div class="tooltip"></div>
+    <script>
+        const margin = { top: 10, right: 20, bottom: 50, left: 50 };
+        let width = window.innerWidth * 1;
+        let height = window.innerHeight * 0.88;
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const tooltip = d3.select(".tooltip");
+
+        const x = d3.scaleTime().range([0, width - margin.left - margin.right]);
+        const y = d3.scaleLinear().range([height - margin.top - margin.bottom, 0]);
+
+        const parseDate = d3.timeParse("%Y-%m-%d");
+
+        // Hardcoded Google updates for 2024
+        // Refer to https://status.search.google.com/products/rGHU1u87FJnkP6W2GwMi/history
+        const googleUpdates = [
+            { date: "2024-12-19", name: "December spam update" },
+            { date: "2024-12-12", name: "December core update" },
+            { date: "2024-11-11", name: "November core update" },
+            // { date: "2024-08-15", name: "Ranking issues" },
+            { date: "2024-08-15", name: "August core update" }
+            // { date: "2024-06-20", name: "June spam update" },
+            // { date: "2024-03-05", name: "March core & spam update" }
+            // { date: "2024-09-20", name: "March core update" }
+        ];
+
+        d3.json("flux_data.json").then(data => {
+            data.forEach(d => {
+                d.date = parseDate(d.date);
+                d.scaled_flux_score = +d.scaled_flux_score;
+            });
+
+            const globalMaxY = d3.max(data, d => d.scaled_flux_score);
+            const categories = Array.from(new Set(data.map(d => d.keyword_category)));
+            let currentDevice = "Desktop";
+            let activeCategories = new Set(categories);
+
+            function updateTitle() {
+                const chartTitle = d3.select("#chart-title");
+                chartTitle.text(`${currentDevice} Flux`);
+            }
+
+            function drawChart(device) {
+                const filteredData = data.filter(d => d.device === device && activeCategories.has(d.keyword_category));
+
+                x.domain(d3.extent(filteredData, d => d.date));
+                y.domain([0, globalMaxY]);
+
+                // Bind data to paths
+                const paths = svg.selectAll(".area").data(categories);
+
+                // Remove paths for inactive categories
+                paths.exit().remove();
+
+                // Add new paths for active categories
+                paths.enter()
+                    .append("path")
+                    .attr("class", "area")
+                    .attr("fill", "rgba(43, 5, 115, 0.10)")
+                    .attr("stroke", "#2B0573")
+                    .attr("stroke-width", 0.5)
+                    .merge(paths) // Merge with existing paths
+                    .transition() // Apply transition to all paths
+                    .duration(1000) // Transition duration in milliseconds
+                    .ease(d3.easeCubicInOut) // Easing function
+                    .attr("d", category => {
+                        const categoryData = filteredData.filter(d => d.keyword_category === category);
+                        return d3.area()
+                            .x(d => x(d.date))
+                            .y0(y(0))
+                            .y1(d => y(d.scaled_flux_score))
+                            .curve(d3.curveBasis)(categoryData);
+                    });
+
+                svg.selectAll(".axis").remove();
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", `translate(0,${height - margin.bottom})`)
+                    .call(d3.axisBottom(x).ticks(10).tickFormat(d3.timeFormat("%b %y")))
+                    .selectAll("text")
+                    .attr("transform", "rotate(-45)")
+                    .style("text-anchor", "end");
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(d3.axisLeft(y));
+
+                svg.selectAll(".annotation")
+                    .data(googleUpdates)
+                    .enter()
+                    .append("line")
+                    .attr("class", "annotation")
+                    .attr("x1", d => x(parseDate(d.date)))
+                    .attr("x2", d => x(parseDate(d.date)))
+                    .attr("y1", y(0))
+                    .attr("y2", y(globalMaxY))
+                    .attr("stroke", "black")
+                    .attr("stroke-dasharray", "4,2")
+                    .attr("stroke-width", 1);
+
+                svg.selectAll(".annotation-label")
+                    .data(googleUpdates)
+                    .enter()
+                    .append("text")
+                    .attr("class", "annotation-label")
+                    .attr("x", d => x(parseDate(d.date)) - 5)
+                    .attr("text-anchor", "end")
+                    .text(d => d.name)
+                    .style("font-size", "10px")
+                    .style("fill", "black")
+                    .each(function(d, i, nodes) {
+                        const label = d3.select(this);
+                        const previous = i > 0 ? d3.select(nodes[i - 1]) : null;
+                        const baseY = margin.top + 10;
+                        let yPos = baseY;
+
+                        if (previous) {
+                            const prevY = +previous.attr("y");
+                            const distance = Math.abs(prevY - yPos);
+                            if (distance < 15) {
+                                yPos = prevY + 15;
+                            }
+                        }
+
+                        label.attr("y", yPos);
+                    });
+            }
+
+            updateTitle();
+
+            function createLegend() {
+                const legend = d3.select("#legend");
+                legend.selectAll("*").remove();
+
+                categories.forEach(category => {
+                    const container = legend.append("div").attr("class", "checkbox-container");
+
+                    container.append("input")
+                        .attr("type", "checkbox")
+                        .attr("checked", true)
+                        .attr("id", category)
+                        .on("change", function () {
+                            if (this.checked) {
+                                activeCategories.add(category);
+                            } else {
+                                activeCategories.delete(category);
+                            }
+                            drawChart(currentDevice);
+                        });
+
+                    container.append("label")
+                        .attr("for", category)
+                        .text(category);
+                });
+            }
+
+            drawChart(currentDevice);
+            createLegend();
+
+            d3.select("#toggle-device").on("click", () => {
+                currentDevice = currentDevice === "Desktop" ? "Mobile" : "Desktop";
+                updateTitle();
+                drawChart(currentDevice);
+            });
+        });
+        ///
+    </script>
+</body>
+</html>
