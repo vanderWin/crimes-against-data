@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Layout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nova+Square&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nova Square', serif;
+            color: #000000; /* Pure black */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header-section {
+            background-color: #2b0573; /* Blue */
+            padding: 10px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-section h1 {
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            margin-top: 10px;
+        }
+        .toggle-section {
+            position: sticky;
+            top: 85px; /* Adjust if needed */
+            z-index: 999;
+            background-color: transparent;
+            padding: 10px;
+            text-align: right;
+        }
+
+            /* Add the button styles here */
+        #toggle-control {
+            font-family: 'Nova Square', serif;
+            background-color: #2b0573;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px; /* Rounded corners */
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #toggle-control:hover {
+            background-color: #6600ff; /* Slightly lighter shade for hover effect */
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            background-color: #ffffff;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row-1 {
+            height: 500px;
+            display: flex;
+        }
+
+        .row-1 .block-1 {
+            flex: 2;
+            position: relative;
+            background-color: #ffffff; /* White */
+            overflow: hidden;
+            width: 66.666%; /* Explicitly set 2/3 width */
+        }
+
+        .row-1 .block-2 {
+            flex: 1;
+            background-color: #ffffff;
+            width: 33.333%; /* Explicitly set 1/3 width */
+        }
+
+        .row-2, .row-3 {
+            height: 300px;
+        }
+
+        /* Row 2 block colors and proportions */
+        .row-2 .block:nth-child(1),
+        .row-2 .block:nth-child(2) {
+            flex: 1; /* Retain equal proportions */
+        }
+
+        .row-2 .block:nth-child(1) {
+            background-color: #e74c3c; /* Red */
+        }
+
+        .row-2 .block:nth-child(2) {
+            background-color: #3498db; /* Blue */
+        }
+
+        /* Row 3 block colors and proportions */
+        .row-3 .block:nth-child(1),
+        .row-3 .block:nth-child(2) {
+            flex: 1; /* Retain equal proportions */
+        }
+
+        .row-3 .block:nth-child(1) {
+            background-color: #2ecc71; /* Green */
+        }
+
+        .row-3 .block:nth-child(2) {
+            background-color: #f1c40f; /* Yellow */
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            background: #333;
+            color: #fff;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        svg {
+            display: block;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.8/browser/pixi.min.js"></script>
+    <script>
+        const googleUpdates = [
+            { date: "2024-12-19", name: "December spam update" },
+            { date: "2024-12-12", name: "December core update" },
+            { date: "2024-11-11", name: "November core update" },
+            { date: "2024-08-15", name: "August core update" }
+        ];
+    </script>
+    <script>
+        let currentDevice = "Mobile";
+    
+        function toggleDevice() {
+            currentDevice = currentDevice === "Desktop" ? "Mobile" : "Desktop";
+            document.dispatchEvent(new CustomEvent('filterChange', { detail: { device: currentDevice } }));
+            document.getElementById('toggle-control').innerText = `Current Device: ${currentDevice}`;
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultDevice = "Mobile"; // Set default device
+            currentDevice = defaultDevice;
+
+            // Set initial toggle button text
+            document.getElementById('toggle-control').innerText = `Current Device: ${defaultDevice}`;
+
+            // Create chart for default device
+            createChart();
+
+            // Add toggle button event listener
+            document.getElementById('toggle-control').addEventListener('click', toggleDevice);
+        });
+
+    </script>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Flux Dashboard v0.1</h1>
+            <p>This is a work in progress for a non-looker studio dashboard.</p>
+        </div>
+        <div class="toggle-section">
+            <button id="toggle-control">Current Device: Mobile</button>
+        </div>
+        <div class="content">
+            <div class="row row-1">
+                <div class="block-1">
+                    <h3 class="block-title">Flux Score Chart</h3>
+                    <div class="tooltip"></div>
+                        <script>
+                            const margin = { top: 5, right: 5, bottom: 50, left: 40 };
+                            const block1 = document.querySelector('.block-1');
+                        
+                            function createChart(filteredDevice = currentDevice) {
+                                const width = block1.offsetWidth - margin.left - margin.right;
+                                const height = block1.offsetHeight - margin.top - margin.bottom;
+
+                                const svg = d3.select(".block-1").select("svg");
+
+                                // If SVG doesn't exist, create it
+                                if (svg.empty()) {
+                                    d3.select(".block-1").append("svg")
+                                        .attr("width", block1.offsetWidth)
+                                        .attr("height", block1.offsetHeight)
+                                        .attr("viewBox", `0 0 ${block1.offsetWidth} ${block1.offsetHeight}`)
+                                        .append("g")
+                                        .attr("transform", `translate(${margin.left},${margin.top})`);
+                                }
+
+                                const g = svg.select("g");
+                                const x = d3.scaleTime().range([0, width]);
+                                const y = d3.scaleLinear().range([height, 0]);
+
+                                const parseDate = d3.timeParse("%Y-%m-%d");
+
+                                d3.json("flux_data.json").then(data => {
+                                    const filteredData = data.filter(d => d.device === filteredDevice);
+
+                                    if (filteredData.length === 0) {
+                                        console.warn("No data available for the selected device:", filteredDevice);
+                                        return;
+                                    }
+
+                                    filteredData.forEach(d => {
+                                        d.date = parseDate(d.date);
+                                        d.scaled_flux_score = +d.scaled_flux_score;
+                                    });
+
+                                    const globalMaxY = d3.max(filteredData, d => d.scaled_flux_score);
+                                    const categories = Array.from(new Set(filteredData.map(d => d.keyword_category)));
+
+                                    x.domain(d3.extent(filteredData, d => d.date));
+                                    y.domain([0, globalMaxY]);
+
+                                    // Update Axes
+                                    const xAxis = g.selectAll(".x-axis").data([null]);
+                                    xAxis.enter()
+                                        .append("g")
+                                        .attr("class", "x-axis")
+                                        .attr("transform", `translate(0,${height})`)
+                                        .merge(xAxis)
+                                        .transition()
+                                        .duration(500)
+                                        .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%b %d")));
+
+                                    const yAxis = g.selectAll(".y-axis").data([null]);
+                                    yAxis.enter()
+                                        .append("g")
+                                        .attr("class", "y-axis")
+                                        .merge(yAxis)
+                                        .transition()
+                                        .duration(500)
+                                        .call(d3.axisLeft(y));
+
+                                    // Update Area Paths
+                                    const areas = g.selectAll(".area")
+                                        .data(categories, d => d); // Use categories as keys
+
+                                    areas.enter()
+                                        .append("path")
+                                        .attr("class", "area")
+                                        .attr("fill", "rgba(43, 5, 115, 0.10)")
+                                        .attr("stroke", "#2B0573")
+                                        .attr("stroke-width", 1)
+                                        .attr("d", category => d3.area()
+                                            .x(d => x(d.date))
+                                            .y0(y(0))
+                                            .y1(d => y(d.scaled_flux_score))
+                                            .curve(d3.curveBasis)(filteredData.filter(d => d.keyword_category === category))
+                                        )
+                                        .merge(areas)
+                                        .transition()
+                                        .duration(500)
+                                        .attr("d", category => d3.area()
+                                            .x(d => x(d.date))
+                                            .y0(y(0))
+                                            .y1(d => y(d.scaled_flux_score))
+                                            .curve(d3.curveBasis)(filteredData.filter(d => d.keyword_category === category))
+                                        );
+
+                                    areas.exit()
+                                        .transition()
+                                        .duration(500)
+                                        .style("opacity", 0)
+                                        .remove();
+
+                                    // Update Annotations (Google Updates)
+                                    const annotations = g.selectAll(".annotation").data(googleUpdates, d => d.date);
+
+                                    // Handle entering and updating annotation lines
+                                    annotations.enter()
+                                        .append("line")
+                                        .attr("class", "annotation")
+                                        .attr("x1", d => x(parseDate(d.date)))
+                                        .attr("x2", d => x(parseDate(d.date)))
+                                        .attr("y1", y(0))
+                                        .attr("y2", y(globalMaxY))
+                                        .attr("stroke", "black")
+                                        .attr("stroke-dasharray", "4,2")
+                                        .attr("stroke-width", 1)
+                                        .merge(annotations)
+                                        .transition()
+                                        .duration(500)
+                                        .attr("x1", d => x(parseDate(d.date)))
+                                        .attr("x2", d => x(parseDate(d.date)))
+                                        .attr("y2", y(globalMaxY));
+
+                                    // Remove exiting annotation lines
+                                    annotations.exit()
+                                        .transition()
+                                        .duration(500)
+                                        .style("opacity", 0)
+                                        .remove();
+
+                                    // Update Annotation Labels (Google Update Names)
+                                    const labels = g.selectAll(".annotation-label").data(googleUpdates, d => d.date);
+
+                                    // Handle entering and updating labels
+                                    labels.enter()
+                                        .append("text")
+                                        .attr("class", "annotation-label")
+                                        .attr("x", d => x(parseDate(d.date)) - 10) // Adjust for positioning
+                                        .attr("y", (d, i) => 10 + i * 15) // Stagger vertically to prevent overlap
+                                        .text(d => d.name)
+                                        .style("font-size", "10px")
+                                        .style("fill", "black")
+                                        .style("text-anchor", "end")
+                                        .merge(labels)
+                                        .transition()
+                                        .duration(500)
+                                        .attr("x", d => x(parseDate(d.date)) - 10)
+                                        .attr("y", (d, i) => 10 + i * 15); // Adjust label positions smoothly
+
+                                    // Remove exiting labels
+                                    labels.exit()
+                                        .transition()
+                                        .duration(500)
+                                        .style("opacity", 0)
+                                        .remove();
+
+                                });
+                            }
+
+                        
+                            // Initialize chart
+                            createChart();
+                        
+                            // Redraw on resize or container changes
+                            const resizeObserver = new ResizeObserver(() => createChart(currentDevice));
+                            resizeObserver.observe(block1);
+
+                        
+                            window.addEventListener("resize", createChart);
+                            document.addEventListener('filterChange', (e) => {
+                                console.log(`Flux Score Chart responding to device: ${e.detail.device}`);
+                                createChart(e.detail.device); // Pass the device to filter data
+                            });
+
+                        </script>
+                                     
+                </div>
+
+                <div class="block-2">
+                <h3 class="block-title">Chaos Wheel</h3>
+                    <script>
+                        // Chaos wheel scripting starts here
+                        // Select block-2
+                        const block2 = document.querySelector('.block-2');
+
+                        // Scaling settings
+                        const baseRadius = 160;
+                        const scaleFactor = 3.5;
+                        let centerX, centerY;
+                        let filteredData = [];
+                        let currentTheta = [];
+
+                        // Initialize PIXI Application
+                        const app = new PIXI.Application({
+                            width: block2.offsetWidth,  // Use block-2 width
+                            height: block2.offsetHeight, // Use block-2 height
+                            backgroundColor: 0xFFFFFF,
+                            antialias: true,
+                        });
+                        block2.appendChild(app.view);
+
+                        // Initialize particles and dateLines after PIXI application
+                        const particles = new PIXI.Container();
+                        const dateLines = new PIXI.Graphics();
+                        app.stage.addChild(dateLines);
+                        app.stage.addChild(particles);
+                        
+                        // Update canvas size to fit block-2
+                        function updateCanvasSize() {
+                            const width = block2.offsetWidth;
+                            const height = block2.offsetHeight;
+
+                            // Resize the PIXI application
+                            app.renderer.resize(width, height);
+
+                            // Update center positions
+                            centerX = width / 2;
+                            centerY = height / 2;
+
+                            // Redraw the chart
+                            drawChart();
+                        }
+
+                        // Function to draw the chart
+                        function drawChart() {
+                            particles.removeChildren();
+                            dateLines.clear();
+
+                            if (!filteredData.length) return; // Do nothing if no data
+
+                            filteredData.forEach((row, i) => {
+                                const particle = new PIXI.Graphics();
+                                particle.beginFill(0x2b0573, 0.25).drawCircle(0, 0, 0.75).endFill();
+
+                                const adjustedTheta = currentTheta[i] - Math.PI / 2;
+                                const r = baseRadius + row.avg_delta * scaleFactor;
+                                particle.x = centerX + Math.cos(adjustedTheta) * r;
+                                particle.y = centerY + Math.sin(adjustedTheta) * r;
+
+                                particles.addChild(particle);
+                            });
+
+                            // Setting important dates via global googleUpdates
+                            googleUpdates.forEach(({ date, color }) => {
+                            const dateObject = new Date(date);
+
+                            // Check if the date is within the dataset range
+                            if (dateObject >= startDate && dateObject <= endDate) {
+                                const normalizedDate = (dateObject - startDate) / (24 * 60 * 60 * 1000);
+                                const angle = (normalizedDate / totalDays) * 2 * Math.PI - Math.PI / 2;
+
+                                const xStart = centerX + Math.cos(angle) * baseRadius;
+                                const yStart = centerY + Math.sin(angle) * baseRadius;
+                                const xEnd = centerX + Math.cos(angle) * (baseRadius + scaleFactor * 15);
+                                const yEnd = centerY + Math.sin(angle) * (baseRadius + scaleFactor * 15);
+
+                                dateLines.lineStyle(1.5, 0x000000, 1); // style goes width, colour, alpha
+                                dateLines.moveTo(xStart, yStart).lineTo(xEnd, yEnd);
+                            } else {
+                                console.warn(`Important date ${date} is outside the dataset range and will not be plotted.`);
+                            }
+                        });
+
+                        }
+
+                        // Animation loop
+                        function animate() {
+                            particles.children.forEach((particle, i) => {
+                                const r = baseRadius + filteredData[i].avg_delta * scaleFactor + Math.sin(t / 4 + i / 10);
+                                particle.x = centerX + Math.cos(currentTheta[i]) * r;
+                                particle.y = centerY + Math.sin(currentTheta[i]) * r;
+                            });
+
+                            app.renderer.render(app.stage);
+                            t++;
+                            requestAnimationFrame(animate);
+                        }
+
+                        // Data loading and chart initialization
+                        let data = null;
+                        let startDate = null;
+                        let endDate = null;
+                        let totalDays = null;
+                        let t = 0;
+
+                        d3.json("chaos_wheel.json").then(loadedData => {
+                            data = loadedData;
+
+                            const dates = data.map(d => new Date(d.date));
+                            startDate = new Date(Math.min(...dates));
+                            endDate = new Date(Math.max(...dates));
+                            totalDays = (endDate - startDate) / (24 * 60 * 60 * 1000);
+
+                            updateData();
+                            animate();
+                        });
+
+                        function updateData(device) {
+                            filteredData = data.filter(d => d.device === currentDevice);
+
+                            if (filteredData.length === 0) {
+                                particles.removeChildren();
+                                currentTheta = [];
+                                return;
+                            }
+
+                            currentTheta = d3.range(0, 2 * Math.PI, (2 * Math.PI) / filteredData.length);
+                            drawChart();
+                        }
+                        document.addEventListener('filterChange', (e) => {
+                            console.log(`Chaos Wheel updating for device: ${e.detail.device}`);
+                            updateData(e.detail.device); // Update data with the selected device
+                        });
+
+
+                        // Initialize the canvas size and redraw on window resize
+                        window.addEventListener("resize", updateCanvasSize);
+                        updateCanvasSize(); // Initial sizing
+
+                        // Chaos wheel scripting stops here
+                    </script>
+                </div>
+                
+            </div>
+            <div class="row row-2">
+                <div class="block">Search Coverage Features</div>
+                <div class="block">Top Domains</div>
+            </div>
+            <div class="row row-3">
+                <div class="block">Top Winners</div>
+                <div class="block">Top Losers</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
