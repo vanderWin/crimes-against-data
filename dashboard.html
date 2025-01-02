@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Layout</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nova+Square&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
 
         * {
             margin: 0;
@@ -14,18 +14,19 @@
         }
 
         body {
-            font-family: 'Nova Square', serif;
-            color: #000000; /* Pure black */
+            font-family: 'Merriweather', serif;
+            color: #ffffff;
         }
 
         .container {
             display: flex;
             flex-direction: column;
+            background-color: #262735;
             height: 100vh;
         }
 
         .header-section {
-            background-color: #2b0573; /* Blue */
+            background-color: #262735;
             padding: 10px;
             color: white;
             position: sticky;
@@ -45,14 +46,16 @@
             top: 85px; /* Adjust if needed */
             z-index: 999;
             background-color: transparent;
+            box-shadow: none; /* Ensure no shadow effect appears */
+            border: none; /* Remove any inherited borders */
             padding: 10px;
             text-align: right;
         }
 
             /* Add the button styles here */
         #toggle-control {
-            font-family: 'Nova Square', serif;
-            background-color: #2b0573;
+            font-family: 'Merriweather', serif;
+            background-color: #f6b53d;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -62,40 +65,48 @@
         }
 
         #toggle-control:hover {
-            background-color: #6600ff; /* Slightly lighter shade for hover effect */
+            background-color: #287e8f;
         }
 
         .content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding: 10px;
-            background-color: #ffffff;
+            gap: 15px;
+            padding: 15px;
+            background-color: #262735;
         }
 
         .row {
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
         .row-1 {
-            height: 500px;
+            height: 515px;
             display: flex;
         }
 
         .row-1 .block-1 {
             flex: 2;
             position: relative;
-            background-color: #ffffff; /* White */
+            background-color: #323447;
             overflow: hidden;
             width: 66.666%; /* Explicitly set 2/3 width */
+            padding: 15px; /* Add inner spacing to all blocks */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         .row-1 .block-2 {
             flex: 1;
-            background-color: #ffffff;
+            background-color: #323447;
             width: 33.333%; /* Explicitly set 1/3 width */
+            padding: 15px; /* Add inner spacing to all blocks */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         .row-2, .row-3 {
@@ -109,11 +120,17 @@
         }
 
         .row-2 .block:nth-child(1) {
-            background-color: #e74c3c; /* Red */
+            background-color: #E85E76; /* Red */
+            padding: 15px; /* Add inner spacing to all blocks */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         .row-2 .block:nth-child(2) {
-            background-color: #3498db; /* Blue */
+            background-color: #287E8F; /* Blue */
+            padding: 15px; /* Add inner spacing to all blocks */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         /* Row 3 block colors and proportions */
@@ -123,11 +140,17 @@
         }
 
         .row-3 .block:nth-child(1) {
-            background-color: #2ecc71; /* Green */
+            background-color: #15CAB6; /* Green */
+            padding: 15px; /* Add inner spacing to all blocks */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         .row-3 .block:nth-child(2) {
-            background-color: #f1c40f; /* Yellow */
+            background-color: #F6D53B; /* Yellow */
+            padding: 15px; /* Add inner spacing to all blocks */
+            border-radius: 10px; /* Adjust value for the desired smoothness */
+            overflow: hidden; /* Ensure contents respect the rounded corners */
         }
 
         .tooltip {
@@ -197,7 +220,7 @@
                     <h3 class="block-title">Flux Score Chart</h3>
                     <div class="tooltip"></div>
                         <script>
-                            const margin = { top: 5, right: 5, bottom: 50, left: 40 };
+                            const margin = { top: 5, right: 30, bottom: 70, left: 30 };
                             const block1 = document.querySelector('.block-1');
                         
                             function createChart(filteredDevice = currentDevice) {
@@ -268,8 +291,8 @@
                                     areas.enter()
                                         .append("path")
                                         .attr("class", "area")
-                                        .attr("fill", "rgba(43, 5, 115, 0.10)")
-                                        .attr("stroke", "#2B0573")
+                                        .attr("fill", "rgba(246, 181, 61, 0.10)")
+                                        .attr("stroke", "#F6B53D")
                                         .attr("stroke-width", 1)
                                         .attr("d", category => d3.area()
                                             .x(d => x(d.date))
@@ -304,7 +327,7 @@
                                         .attr("x2", d => x(parseDate(d.date)))
                                         .attr("y1", y(0))
                                         .attr("y2", y(globalMaxY))
-                                        .attr("stroke", "black")
+                                        .attr("stroke", "#FFFFFF")
                                         .attr("stroke-dasharray", "4,2")
                                         .attr("stroke-width", 1)
                                         .merge(annotations)
@@ -332,7 +355,7 @@
                                         .attr("y", (d, i) => 10 + i * 15) // Stagger vertically to prevent overlap
                                         .text(d => d.name)
                                         .style("font-size", "10px")
-                                        .style("fill", "black")
+                                        .style("fill", "white")
                                         .style("text-anchor", "end")
                                         .merge(labels)
                                         .transition()
@@ -387,7 +410,7 @@
                         const app = new PIXI.Application({
                             width: block2.offsetWidth,  // Use block-2 width
                             height: block2.offsetHeight, // Use block-2 height
-                            backgroundColor: 0xFFFFFF,
+                            backgroundColor: 0x323447, // Chart background
                             antialias: true,
                         });
                         block2.appendChild(app.view);
@@ -400,9 +423,8 @@
                         
                         // Update canvas size to fit block-2
                         function updateCanvasSize() {
-                            const width = block2.offsetWidth;
-                            const height = block2.offsetHeight;
-
+                            const width = block2.offsetWidth * 0.95; // Reduce width to 90% of block-2
+                            const height = block2.offsetHeight * 0.9; // Reduce height to 90% of block-2
                             // Resize the PIXI application
                             app.renderer.resize(width, height);
 
@@ -423,7 +445,7 @@
 
                             filteredData.forEach((row, i) => {
                                 const particle = new PIXI.Graphics();
-                                particle.beginFill(0x2b0573, 0.25).drawCircle(0, 0, 0.75).endFill();
+                                particle.beginFill(0x15CAB6, 0.75).drawCircle(0, 0, 0.75).endFill();
 
                                 const adjustedTheta = currentTheta[i] - Math.PI / 2;
                                 const r = baseRadius + row.avg_delta * scaleFactor;
@@ -447,7 +469,7 @@
                                 const xEnd = centerX + Math.cos(angle) * (baseRadius + scaleFactor * 15);
                                 const yEnd = centerY + Math.sin(angle) * (baseRadius + scaleFactor * 15);
 
-                                dateLines.lineStyle(1.5, 0x000000, 1); // style goes width, colour, alpha
+                                dateLines.lineStyle(1.5, 0xFFFFFFF, 1); // style goes width, colour, alpha
                                 dateLines.moveTo(xStart, yStart).lineTo(xEnd, yEnd);
                             } else {
                                 console.warn(`Important date ${date} is outside the dataset range and will not be plotted.`);
