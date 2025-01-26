@@ -1,0 +1,328 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+
+/* Top Performers Block */
+.top_performers {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    height: 400px; /* Adjust based on desired row height */
+}
+
+.top_performers .block {
+    flex: 1; /* Equal width for both blocks */
+    background-color: #323447;
+    border-radius: 10px;
+    padding: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Block Title Styling */
+.top_performers .block-title {
+    margin-bottom: 15px;
+}
+
+/* Responsive Scaling */
+@media (max-width: 1000px) {
+    .top_performers {
+        flex-direction: column;
+        height: auto; /* Allow height to adjust dynamically */
+    }
+
+    .top_performers .block {
+        width: 100%; /* Stack blocks vertically */
+        height: auto;
+    }
+}
+
+#search-features-chart, #top_domains_chart {
+    width: 100%;
+    height: 100%;
+    min-height: 300px; /* Prevent very small heights */
+}
+
+
+
+
+
+
+
+/* General reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: 'Merriweather', serif;
+    color: #ffffff;
+    background-color: #262735;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    flex-direction: column;
+    /* height: 100vh; */
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+}
+
+::-webkit-scrollbar-track {
+    background: #323447;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #f6b53d;
+    border-radius: 10px;
+    border: 2px solid #323447;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #e89333;
+}
+
+::-webkit-scrollbar-corner {
+    background: #323447;
+}
+
+/* Header section */
+.header-section {
+    background-color: #262735;
+    padding: 10px;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-section h1 {
+    margin-bottom: 10px;
+}
+
+.header-section p {
+    margin-top: 10px;
+}
+
+/* Toggle section */
+.toggle-section {
+    position: sticky;
+    top: 85px;
+    z-index: 999;
+    /* Instead of a solid red, we use a top-to-bottom linear gradient */
+    background: linear-gradient(
+        to bottom,
+        rgba(50, 52, 71, 1) 0%,    /* fully opaque at top */
+        rgba(50, 52, 71, 0) 100%  /* fully transparent at bottom */
+    );
+    /* box-shadow: none; */
+    /* border: none; */
+    padding: 10px;
+    text-align: right;
+}
+
+/* Toggle and category buttons in the same row */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+}
+
+.category-button {
+    font-family: 'Merriweather', serif;
+    /* background-color: red; */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+/* Toggle button */
+#toggle-control {
+    font-family: 'Merriweather', serif;
+    background-color: #f6b53d;
+    color: #323447;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#toggle-control:hover {
+    background-color: #287e8f;
+}
+
+/* Content section */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background-color: #262735;
+}
+
+.row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Row 1 (Flux Score & Chaos Wheel) */
+.row-1 {
+    height: 515px;
+    display: flex;
+}
+
+.row-1 .block-1 {
+    flex: 2;
+    position: relative;
+    background-color: #323447;
+    overflow: hidden;
+    width: 66.666%;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.row-1 .block-2 {
+    flex: 1;
+    background-color: #323447;
+    width: 33.333%;
+    padding: 15px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    overflow: hidden;
+}
+/* Row styles for rows 2 and 3 */
+.row-2, .row-3, .row-4 {
+    display: flex;
+    flex-direction: row;
+    height: 400px; /* Each row is 400px high */
+    width: 100%; /* Full width */
+    margin-bottom: 15px; /* Add spacing between rows */
+}
+
+/* Blocks inside row-2 and row-3 */
+.row-2 .block, .row-3, .row-4 .block {
+    flex: 1; /* Equal width */
+    width: 100%; /* Ensure block spans the row's full width */
+    height: 100%; /* Full height of the row */
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Row 2: Search Features Chart block */
+.row-2 .block:nth-child(1) {
+    background-color: #323447;
+}
+
+.block-search-features {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+/* Row 3 blocks */
+.row-4 {
+    height: 400px;
+}
+
+.row-4 .block {
+    background-color: #323447;
+    padding: 15px;
+    border-radius: 10px;
+    height: 100%; /* fill the row’s 400px height */
+    width: 100%; /* or flex: 1; if you want it to share space with another block */
+}
+
+.row-4 .block h3 {
+    margin-bottom: 15px;
+}
+
+.row-4 .block .scrollable-table-container {
+    width: 100%;
+    max-height: 90%;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Scrollable tables */
+.scrollable-table-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.scrollable-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.scrollable-table-container th, 
+.scrollable-table-container td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.scrollable-table-container th {
+    background-color: #287E8F;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+.scrollable-table-container tbody td {
+    font-family: 'Merriweather Sans', sans-serif;
+}
+
+.scrollable-table-container th {
+    font-family: 'Merriweather', serif;
+}
+
+/* SVG styling */
+svg {
+    display: block;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    z-index: 1000;
+    font-family: 'Merriweather Sans', sans-serif;
+    font-size: 12px;
+}
+
+
+.line {
+    fill: none;
+    stroke-width: 2px;
+}
+
