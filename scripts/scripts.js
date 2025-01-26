@@ -154,25 +154,6 @@ function updateCategoryData() {
     console.log(`Active category: ${activeCategory}`);
 }
 
-// Update on filter changes
-document.addEventListener('filterChange', e => {
-    createSearchFeaturesChart(
-        "#search-features-chart",
-        searchFeaturesData,
-        e.detail.device,
-        activeCategory
-    );
-});
-
-document.addEventListener('categoryFilterChange', e => {
-    createSearchFeaturesChart(
-        "#search-features-chart",
-        searchFeaturesData,
-        currentDevice,
-        e.detail.category
-    );
-});
-
 // Category filtereing and styling blocks
 document.addEventListener("DOMContentLoaded", () => {
     const categories = [
